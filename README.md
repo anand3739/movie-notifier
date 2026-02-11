@@ -45,21 +45,21 @@ movie-notifier/
 └── README.md
 
 1️⃣ Clone the repository
-  in bash
-    git clone https://github.com/YOUR_USERNAME/movie-notifier.git
-    cd movie-notifier
+  -in bash
+    -git clone https://github.com/YOUR_USERNAME/movie-notifier.git
+    -cd movie-notifier
 
 2️⃣ Create virtual environment
-  python -m venv venv
-  venv\Scripts\activate   # Windows
+  -python -m venv venv
+  -venv\Scripts\activate   # Windows
 
 3️⃣ Install dependencies
-  pip install -r requirements.txt
+  -pip install -r requirements.txt
 
 4️⃣ Create .env file with this values
-  API_KEY=your_tmdb_api_key
-  TELEGRAM_TOKEN=your_bot_token
-  TELEGRAM_CHAT_ID=your_chat_id
+  -API_KEY=your_tmdb_api_key
+  -TELEGRAM_TOKEN=your_bot_token
+  -TELEGRAM_CHAT_ID=your_chat_id
 
 5️⃣ Run the app, click and open the ip address
 
