@@ -92,6 +92,11 @@ def home():
 
         showtimes = demo_theatres.get(location.lower(), [])
 
+        if showtimes:
+            message = f"🎬 Showtimes available for {movie} in {location}."
+            send_telegram_notification(message)
+
+
     return render_template("index.html", movie=movie_data, showtimes=showtimes)
 
 def run_scheduler():
