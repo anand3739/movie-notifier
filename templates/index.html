@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Notifier</title>
+</head>
+<body>
+
+    <h1>Movie Showtime Notifier</h1>
+
+    <form method="POST">
+        <label>Movie Name:</label><br>
+        <input type="text" name="movie" required><br><br>
+
+        <label>Location:</label><br>
+        <input type="text" name="location" required><br><br>
+
+        <button type="submit">Check Showtimes</button>
+    </form>
+
+    {% if movie %}
+    <h2>Result:</h2>
+    <p><b>Title:</b> {{ movie.title }}</p>
+    <p><b>Release Date:</b> {{ movie.release_date }}</p>
+    <p><b>Overview:</b> {{ movie.overview }}</p>
+    {% endif %}
+
+    {% if showtimes %}
+    <h2>Theatre Showtimes:</h2>
+    <ul>
+        {% for theatre in showtimes %}
+            <li>
+                <b>{{ theatre.theatre }}</b> —
+                {{ theatre.times | join(", ") }}
+            </li>
+        {% endfor %}
+    </ul>
+    {% elif movie %}
+    <p>No showtimes found for this location.</p>
+    {% endif %}
+
+
+
+</body>
+</html>
