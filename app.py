@@ -95,7 +95,7 @@ def home():
     return render_template("index.html", movie=movie_data, showtimes=showtimes)
 
 def run_scheduler():
-    schedule.every(5).minutes.do(check_showtimes)
+    schedule.every(30).seconds.do(check_showtimes)
 
     while True:
         schedule.run_pending()
