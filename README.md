@@ -79,6 +79,7 @@ movie-notifier/
 
 👨‍💻 Author
 Anand Bandela
+Akkandra Khanetra
 Project: Movie Showtime Notifier
 
 ⭐ Future Improvements
