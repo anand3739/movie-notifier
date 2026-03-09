@@ -14,20 +14,24 @@ API_KEY = os.getenv("API_KEY")
 
 last_checked = {}
 
+
 def send_telegram_notification(message):
     token = os.getenv("TELEGRAM_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    if not token or not chat_id:
+        print("Telegram credentials are missing; notification skipped.")
+        return
 
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = {
         "chat_id": chat_id,
-        "text": message
+        "text": message,
     }
 
     try:
         requests.post(url, data=data, timeout=5)
-        print("📩 Telegram message sent!")
+        print("Telegram message sent.")
     except Exception as e:
         print("Telegram error:", e)
 
@@ -43,37 +47,54 @@ def check_showtimes():
 
         # Here we simulate checking
         # (later we connect real website/API)
-
-        message = f"🎬 Showtimes available for {movie} in {location}."
+        message = f"Showtimes available for {movie} in {location}."
         print(message)
 
         send_telegram_notification(message)
-
 
 
 @app.route("/", methods=["GET", "POST"])
 def home():
     movie_data = None
     showtimes = []
+    status_message = None
+    error_message = None
+    search = {"movie": "", "location": ""}
 
     if request.method == "POST":
-        movie = request.form["movie"]
-        location = request.form["location"]
+        movie = request.form.get("movie", "").strip()
+        location = request.form.get("location", "").strip()
+        search = {"movie": movie, "location": location}
+
+        if not movie or not location:
+            error_message = "Please enter both movie name and location."
+            return render_template(
+                "index.html",
+                movie=movie_data,
+                showtimes=showtimes,
+                search=search,
+                status_message=status_message,
+                error_message=error_message,
+            )
 
         user_key = f"{movie}_{location}"
         last_checked[user_key] = {"movie": movie, "location": location}
 
         # ---- TMDB API CALL ----
-        url = f"https://api.themoviedb.org/3/search/movie?api_key={API_KEY}&query={movie}"
-        try:
-            response = requests.get(url, timeout=5)
-            response = response.json()
-        except requests.exceptions.RequestException:
-            response = {}
+        if API_KEY:
+            url = f"https://api.themoviedb.org/3/search/movie?api_key={API_KEY}&query={movie}"
+            try:
+                response = requests.get(url, timeout=5)
+                response_data = response.json()
+            except requests.exceptions.RequestException:
+                response_data = {}
 
-
-        if "results" in response and response["results"]:
-            movie_data = response["results"][0]
+            if "results" in response_data and response_data["results"]:
+                movie_data = response_data["results"][0]
+            else:
+                status_message = f"No movie details found for '{movie}'."
+        else:
+            error_message = "TMDB API key is missing. Add API_KEY to your .env file."
 
         # ---- DEMO SHOWTIME DATA ----
         demo_theatres = {
@@ -93,11 +114,21 @@ def home():
         showtimes = demo_theatres.get(location.lower(), [])
 
         if showtimes:
-            message = f"🎬 Showtimes available for {movie} in {location}."
+            message = f"Showtimes available for {movie} in {location}."
             send_telegram_notification(message)
+            status_message = f"Found {len(showtimes)} theatres in {location.title()}."
+        elif not status_message:
+            status_message = f"No demo showtimes found for {location.title()}."
 
+    return render_template(
+        "index.html",
+        movie=movie_data,
+        showtimes=showtimes,
+        search=search,
+        status_message=status_message,
+        error_message=error_message,
+    )
 
-    return render_template("index.html", movie=movie_data, showtimes=showtimes)
 
 def run_scheduler():
     schedule.every(30).seconds.do(check_showtimes)
@@ -106,13 +137,7 @@ def run_scheduler():
         schedule.run_pending()
         time.sleep(1)
 
+
 if __name__ == "__main__":
     threading.Thread(target=run_scheduler, daemon=True).start()
     app.run(debug=True, use_reloader=False)
-
-
-
-
-
-
-

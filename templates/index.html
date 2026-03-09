@@ -1,44 +1,345 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Notifier</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-1: #0a1f2d;
+            --bg-2: #153e52;
+            --panel: #f8f6f1;
+            --ink: #1e1f28;
+            --muted: #5e6470;
+            --accent: #ee6c4d;
+            --accent-2: #118ab2;
+            --ok: #1f9d79;
+            --warn: #b42318;
+            --border: #d5d8df;
+            --shadow: 0 16px 40px rgba(10, 31, 45, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Space Grotesk", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 15% 15%, rgba(238, 108, 77, 0.22), transparent 42%),
+                radial-gradient(circle at 80% 10%, rgba(17, 138, 178, 0.22), transparent 38%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2));
+            padding: 28px 16px 48px;
+        }
+
+        .page {
+            width: min(980px, 100%);
+            margin: 0 auto;
+            background: var(--panel);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: rise 420ms ease-out both;
+        }
+
+        .hero {
+            background: linear-gradient(120deg, rgba(21, 62, 82, 0.94), rgba(10, 31, 45, 0.95));
+            color: #ffffff;
+            padding: 28px 26px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            border-radius: 999px;
+            right: -40px;
+            top: -40px;
+            background: radial-gradient(circle, rgba(238, 108, 77, 0.4), rgba(238, 108, 77, 0));
+        }
+
+        .title {
+            margin: 0;
+            font-family: "DM Serif Display", Georgia, serif;
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            letter-spacing: 0.2px;
+        }
+
+        .subtitle {
+            margin: 10px 0 0;
+            color: rgba(255, 255, 255, 0.88);
+            max-width: 680px;
+        }
+
+        .content {
+            padding: 24px 20px 28px;
+            display: grid;
+            gap: 16px;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            animation: rise 480ms ease-out both;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            font: inherit;
+            background: #fbfcff;
+            transition: border-color 180ms ease, box-shadow 180ms ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-2);
+            box-shadow: 0 0 0 4px rgba(17, 138, 178, 0.15);
+        }
+
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            background: var(--accent);
+            color: #ffffff;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 150ms ease, filter 150ms ease;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+        }
+
+        .banner {
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 600;
+        }
+
+        .banner-ok {
+            background: rgba(31, 157, 121, 0.12);
+            color: var(--ok);
+            border: 1px solid rgba(31, 157, 121, 0.25);
+        }
+
+        .banner-warn {
+            background: rgba(180, 35, 24, 0.1);
+            color: var(--warn);
+            border: 1px solid rgba(180, 35, 24, 0.2);
+        }
+
+        .section-title {
+            margin: 0 0 10px;
+            font-size: 1.15rem;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: 190px 1fr;
+            gap: 14px;
+            align-items: start;
+        }
+
+        .poster {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #f2f4f7;
+            min-height: 220px;
+            object-fit: cover;
+        }
+
+        .meta {
+            margin: 0 0 10px;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .overview {
+            margin: 0;
+            line-height: 1.55;
+        }
+
+        .showtimes {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .showtime-item {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            background: #fcfdff;
+        }
+
+        .theatre {
+            font-weight: 700;
+        }
+
+        .times {
+            margin-top: 6px;
+            color: var(--muted);
+        }
+
+        .note {
+            color: var(--muted);
+            margin: 0;
+        }
+
+        .card:nth-child(1) { animation-delay: 60ms; }
+        .card:nth-child(2) { animation-delay: 120ms; }
+        .card:nth-child(3) { animation-delay: 180ms; }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 16px 10px 28px;
+            }
+
+            .hero {
+                padding: 22px 16px;
+            }
+
+            .content {
+                padding: 16px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .movie-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .poster {
+                max-width: 240px;
+                margin: 0 auto;
+            }
+        }
+    </style>
 </head>
 <body>
+    <main class="page">
+        <section class="hero">
+            <h1 class="title">Movie Showtime Notifier</h1>
+            <p class="subtitle">Search for a movie, set a city, and check available demo theatre slots in one clean live page.</p>
+        </section>
 
-    <h1>Movie Showtime Notifier</h1>
+        <section class="content">
+            <form class="card" method="POST">
+                <div class="form-grid">
+                    <div>
+                        <label for="movie">Movie Name</label>
+                        <input id="movie" type="text" name="movie" value="{{ search.movie }}" placeholder="Dune Part Two" required>
+                    </div>
 
-    <form method="POST">
-        <label>Movie Name:</label><br>
-        <input type="text" name="movie" required><br><br>
+                    <div>
+                        <label for="location">Location</label>
+                        <input id="location" type="text" name="location" value="{{ search.location }}" placeholder="Hyderabad" required>
+                    </div>
 
-        <label>Location:</label><br>
-        <input type="text" name="location" required><br><br>
+                    <div>
+                        <button type="submit">Check Showtimes</button>
+                    </div>
+                </div>
+            </form>
 
-        <button type="submit">Check Showtimes</button>
-    </form>
+            {% if status_message %}
+            <div class="banner banner-ok">{{ status_message }}</div>
+            {% endif %}
 
-    {% if movie %}
-    <h2>Result:</h2>
-    <p><b>Title:</b> {{ movie.title }}</p>
-    <p><b>Release Date:</b> {{ movie.release_date }}</p>
-    <p><b>Overview:</b> {{ movie.overview }}</p>
-    {% endif %}
+            {% if error_message %}
+            <div class="banner banner-warn">{{ error_message }}</div>
+            {% endif %}
 
-    {% if showtimes %}
-    <h2>Theatre Showtimes:</h2>
-    <ul>
-        {% for theatre in showtimes %}
-            <li>
-                <b>{{ theatre.theatre }}</b> —
-                {{ theatre.times | join(", ") }}
-            </li>
-        {% endfor %}
-    </ul>
-    {% elif movie %}
-    <p>No showtimes found for this location.</p>
-    {% endif %}
+            {% if movie %}
+            <article class="card">
+                <h2 class="section-title">Movie Details</h2>
+                <div class="movie-grid">
+                    {% if movie.poster_path %}
+                    <img class="poster" src="https://image.tmdb.org/t/p/w342{{ movie.poster_path }}" alt="{{ movie.title }} poster">
+                    {% else %}
+                    <div class="poster" aria-label="Poster not available"></div>
+                    {% endif %}
 
+                    <div>
+                        <h3 class="section-title">{{ movie.title }}</h3>
+                        <p class="meta">Release Date: {{ movie.release_date or "Unknown" }}</p>
+                        <p class="overview">{{ movie.overview or "Overview not available." }}</p>
+                    </div>
+                </div>
+            </article>
+            {% endif %}
 
-
+            {% if showtimes %}
+            <section class="card">
+                <h2 class="section-title">Theatre Showtimes</h2>
+                <ul class="showtimes">
+                    {% for theatre in showtimes %}
+                    <li class="showtime-item">
+                        <div class="theatre">{{ theatre.theatre }}</div>
+                        <div class="times">{{ theatre.times | join("  |  ") }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% elif search.movie and search.location %}
+            <section class="card">
+                <p class="note">No showtimes found for this location yet.</p>
+            </section>
+            {% endif %}
+        </section>
+    </main>
 </body>
 </html>
